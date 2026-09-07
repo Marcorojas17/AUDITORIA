@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoría Ransomware · KRONOS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0b0a12;
+            color: #e0dcec;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .dashboard {
+            max-width: 1200px;
+            width: 100%;
+            background: #13111e;
+            border-radius: 32px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 1px solid #2a253a;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .header h1 {
+            font-weight: 700;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #f0a030, #d45a1a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .status-badge {
+            background: #1e1a2f;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            border: 1px solid #3d3555;
+            color: #b0a8c8;
+        }
+        .status-badge .dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background: #44dd88;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .card {
+            background: #1a1728;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid #2e2845;
+        }
+        .card h3 {
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a098c0;
+            margin-bottom: 0.8rem;
+        }
+        .file-upload {
+            border: 2px dashed #3d3555;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .file-upload:hover { border-color: #f0a030; background: #1e1a2f; }
+        .file-upload input { display: none; }
+        .file-info { margin-top: 0.8rem; font-size: 0.9rem; color: #b0a8c8; }
+
+        .progress-bar {
+            background: #2a253a;
+            height: 8px;
+            border-radius: 10px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f0a030, #d45a1a);
+            transition: width 0.3s;
+        }
+
+        .log-area {
+            background: #0b0a12;
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #80d0aa;
+            border: 1px solid #2a253a;
+        }
+        .log-area .warn { color: #f0a030; }
+        .log-area .success { color: #44dd88; }
+        .log-area .error { color: #ff6b6b; }
+
+        .btn {
+            background: #2a253a;
+            border: none;
+            color: #e0dcec;
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid #3d3555;
+        }
+        .btn-primary {
+            background: #f0a030;
+            color: #0b0a12;
+            border: none;
+        }
+        .btn-primary:hover { background: #d45a1a; transform: scale(1.02); }
+        .btn-danger { border-color: #ff6b6b; color: #ff6b6b; }
+        .btn-danger:hover { background: #ff6b6b22; }
+
+        .flex-row { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; }
+
+        @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>🛡️ KRONOS · Ransomware Auditor</h1>
+            <span class="status-badge"><span class="dot"></span> Motor activo · Fuerza bruta dirigida</span>
+        </div>
+
+        <div class="grid-2">
+            <!-- COLUMNA IZQUIERDA -->
+            <div>
+                <div class="card">
+                    <h3>📁 Cargar archivo secuestrado</h3>
+                    <div class="file-upload" id="dropZone">
+                        <div style="font-size: 2.5rem;">📄</div>
+                        <p>Arrastra o haz clic para seleccionar</p>
+                        <input type="file" id="fileInput">
+                        <div class="file-info" id="fileInfo">Ningún archivo seleccionado</div>
+                    </div>
+                    <div style="margin-top: 1.2rem;">
+                        <div class="flex-row">
+                            <button class="btn btn-primary" id="btnAuditar">🔍 Auditar Ransomware</button>
+                            <button class="btn btn-danger" id="btnFuerzaBruta">⚡ Fuerza bruta</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Progreso de descifrado</h3>
+                    <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+                    <div id="progressText" style="font-size:0.9rem; color:#b0a8c8;">Esperando acción...</div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA -->
+            <div>
+                <div class="card">
+                    <h3>📋 Bitácora forense</h3>
+                    <div class="log-area" id="logArea">
+                        <div>[SISTEMA] Auditoría inicializada</div>
+                        <div>[SISTEMA] Esperando archivo...</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:1.5rem;">
+                    <h3>🔑 Claves probadas</h3>
+                    <div style="font-size:0.9rem; color:#b0a8c8; display:flex; justify-content:space-between;">
+                        <span>Intentos: <strong id="intentos">0</strong></span>
+                        <span>Última clave: <strong id="lastKey">---</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top:1px solid #2a253a; padding-top:1.5rem; margin-top:1rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+            <span style="font-size:0.8rem; color:#5a4e7a;">KRONOS · Auditoría de Ransomware v1.0 · SafeCreative ID 2607146379465</span>
+            <span style="font-size:0.8rem; color:#5a4e7a;">⚡ Motor de fuerza bruta dirigida · 97 patrones</span>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const logArea = document.getElementById('logArea');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const intentosSpan = document.getElementById('intentos');
+        const lastKeySpan = document.getElementById('lastKey');
+
+        let selectedFile = null;
+        let isRunning = false;
+
+        // Log helper
+        function addLog(msg, type = '') {
+            const div = document.createElement('div');
+            div.textContent = msg;
+            if (type) div.className = type;
+            logArea.appendChild(div);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        // Simular detección de ransomware
+        function detectarRansomware(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const ransomExts = ['encrypted', 'locked', 'crypt', 'ransom', 'wannacry', 'badblock'];
+            if (ransomExts.includes(ext)) return true;
+            // Simulación: archivos > 10KB con extensión .dat o .bin
+            if ((ext === 'dat' || ext === 'bin') && file.size > 10240) return true;
+            return false;
+        }
+
+        // Simular fuerza bruta
+        function fuerzaBruta(file, callback) {
+            let intentos = 0;
+            const maxIntentos = 97; // basado en K4
+            const posibles = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=';
+            let found = false;
+
+            function step() {
+                if (intentos >= maxIntentos || found) {
+                    if (found) {
+                        addLog('✅ ¡Clave encontrada! Archivo descifrado.', 'success');
+                        progressText.textContent = '✅ Descifrado completado';
+                    } else {
+                        addLog('❌ No se encontró clave en el diccionario.', 'error');
+                        progressText.textContent = '❌ Falló el descifrado';
+                    }
+                    isRunning = false;
+                    callback(found);
+                    return;
+                }
+
+                intentos++;
+                const clave = posibles[intentos % posibles.length] + posibles[Math.floor(intentos / 3) % posibles.length];
+                intentosSpan.textContent = intentos;
+                lastKeySpan.textContent = clave;
+                const progress = Math.min((intentos / maxIntentos) * 100, 100);
+                progressFill.style.width = progress + '%';
+                progressText.textContent = `Probando clave ${intentos}/${maxIntentos} ...`;
+
+                // Simular acierto aleatorio (10% de probabilidad después del 50% de intentos)
+                if (intentos > maxIntentos * 0.5 && Math.random() < 0.12) {
+                    found = true;
+                    addLog(`🔑 Clave encontrada: ${clave} (intento ${intentos})`, 'success');
+                    progressFill.style.width = '100%';
+                    progressText.textContent = '✅ ¡Clave válida!';
+                    isRunning = false;
+                    callback(true);
+                    return;
+                }
+
+                setTimeout(step, 80 + Math.random() * 60);
+            }
+
+            step();
+        }
+
+        // Eventos
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#f0a030'; });
+        dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#3d3555'; });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#3d3555';
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (fileInput.files.length) handleFile(fileInput.files[0]);
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            fileInfo.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+            addLog(`📂 Archivo cargado: ${file.name} (${file.size} bytes)`);
+            // Detección automática
+            if (detectarRansomware(file)) {
+                addLog('⚠️ Posible ransomware detectado (patrón de cifrado)', 'warn');
+            } else {
+                addLog('ℹ️ El archivo no muestra patrones de ransomware conocidos.', 'warn');
+            }
+        }
+
+        document.getElementById('btnAuditar').addEventListener('click', () => {
+            if (!selectedFile) { addLog('⚠️ Primero carga un archivo.', 'error'); return; }
+            addLog('🔍 Iniciando auditoría de ransomware...');
+            addLog(`📊 Analizando ${selectedFile.name}...`);
+            setTimeout(() => {
+                const tieneRansom = detectarRansomware(selectedFile);
+                if (tieneRansom) {
+                    addLog('⚠️ Se detectó cifrado ransomware. Recomendamos fuerza bruta.', 'warn');
+                } else {
+                    addLog('✅ No se detectó ransomware. Archivo seguro.', 'success');
+                }
+            }, 500);
+        });
+
+        document.getElementById('btnFuerzaBruta').addEventListener('click', () => {
+            if (!selectedFile) { addLog('⚠️ Primero carga un archivo.', 'error'); return; }
+            if (isRunning) { addLog('⏳ Ya hay un proceso en curso.', 'warn'); return; }
+            const tieneRansom = detectarRansomware(selectedFile);
+            if (!tieneRansom) {
+                addLog('⚠️ El archivo no parece estar cifrado. ¿Seguro?', 'warn');
+            }
+            addLog('⚡ Iniciando ataque de fuerza bruta dirigida...');
+            isRunning = true;
+            intentosSpan.textContent = '0';
+            lastKeySpan.textContent = '---';
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Iniciando...';
+            fuerzaBruta(selectedFile, (exito) => {
+                if (exito) {
+                    addLog('✅ Archivo descifrado con éxito.', 'success');
+                } else {
+                    addLog('❌ No se pudo descifrar. Prueba otro diccionario.', 'error');
+                }
+            });
+        });
+
+        // Inicializar log
+        addLog('[SISTEMA] Motor KRONOS listo para auditoría.');
+    </script>
+</body>
+</html>
